@@ -56,7 +56,7 @@ TEXT TO ANALYZE:
 ${text}`;
 
   try {
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
     const result = await model.generateContent(prompt);
     const response = await result.response;
     const output = response.text();
@@ -79,13 +79,12 @@ function parseOutput(output: string): AnalysisResult {
   // Clean up potential markdown blocks if Gemini ignores instructions
   const cleanOutput = output.replace(/```[a-z]*\n?|```/gi, '').trim();
 
-  const analysisMatch = cleanOutput.match(/--- ANALYSIS ---([\s\S]*?)--- HUMANIZED VERSION ---/i);
-  const humanizedMatch = cleanOutput.match(/--- HUMANIZED VERSION ---([\s\S]*?)--- IMPROVEMENT TIPS ---/i);
-  const tipsMatch = cleanOutput.match(/--- IMPROVEMENT TIPS ---([\s\S]*)/i);
+  const analysisMatch = cleanOutput.match(/--- ANALYSIS ---([\/\s\S]*?)--- HUMANIZED VERSION ---/i);
+  const humanizedMatch = cleanOutput.match(/--- HUMANIZED VERSION ---([\/\s\S]*?)--- IMPROVEMENT TIPS ---/i);
+  const tipsMatch = cleanOutput.match(/--- IMPROVEMENT TIPS ---([\/\s\S]*)/i);
 
   if (!analysisMatch || !humanizedMatch || !tipsMatch) {
     console.warn("Parsing failed for output:", cleanOutput);
-    // Fallback parsing or throw error
     return {
       aiLikelihood: "Analysis failed",
       reasons: ["The model output could not be parsed correctly."],
