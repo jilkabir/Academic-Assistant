@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { analyzeAndHumanize } from '../src/services/geminiService.ts';
+import { analyzeAndHumanize } from '../src/services/geminiService';
 
 export default async function handler(
   request: VercelRequest,
