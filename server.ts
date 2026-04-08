@@ -25,9 +25,9 @@ async function startServer() {
     try {
       const result = await analyzeAndHumanize(text, intensity);
       res.json(result);
-    } catch (error) {
+    } catch (error: any) {
       console.error("API Error:", error);
-      res.status(500).json({ error: "Failed to process text" });
+      res.status(500).json({ error: error.message || "Failed to process text" });
     }
   });
 

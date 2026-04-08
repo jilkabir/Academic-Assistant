@@ -56,14 +56,21 @@ TEXT TO ANALYZE:
 ${text}`;
 
   try {
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
     const result = await model.generateContent(prompt);
     const response = await result.response;
     const output = response.text();
     
+    if (!output) {
+      throw new Error("Empty response from Gemini API");
+    }
+
     return parseOutput(output);
-  } catch (error) {
-    console.error("Gemini API Error:", error);
+  } catch (error: any) {
+    console.error("Gemini API Error Details:", error);
+    if (error.message?.includes("API_KEY_INVALID")) {
+      throw new Error("Invalid API Key. Please check your Vercel Environment Variables.");
+    }
     throw error;
   }
 }

@@ -43,14 +43,15 @@ export default function App() {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to analyze text");
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to analyze text");
       }
 
       const data = await response.json();
       setResult(data);
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      setError("Failed to analyze text. Please try again.");
+      setError(err.message || "Failed to analyze text. Please try again.");
     } finally {
       setIsAnalyzing(false);
     }
