@@ -42,12 +42,19 @@ export default function App() {
         body: JSON.stringify({ text: inputText, intensity }),
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to analyze text");
+      const contentType = response.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        const text = await response.text();
+        console.error("Non-JSON response:", text);
+        throw new Error("Server returned an invalid response. Please check your Vercel logs.");
       }
 
       const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to analyze text");
+      }
+
       setResult(data);
     } catch (err: any) {
       console.error(err);
