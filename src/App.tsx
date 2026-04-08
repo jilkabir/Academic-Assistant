@@ -17,7 +17,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { analyzeAndHumanize, AnalysisResult } from "@/src/services/geminiService";
+import { type AnalysisResult } from "@/src/services/geminiService";
 import { cn } from "@/lib/utils";
 
 export default function App() {
@@ -34,7 +34,19 @@ export default function App() {
     setIsAnalyzing(true);
     setError(null);
     try {
-      const data = await analyzeAndHumanize(inputText, intensity);
+      const response = await fetch("/api/humanize", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ text: inputText, intensity }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to analyze text");
+      }
+
+      const data = await response.json();
       setResult(data);
     } catch (err) {
       console.error(err);

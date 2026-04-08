@@ -1,6 +1,17 @@
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+let genAI: GoogleGenerativeAI | null = null;
+
+function getGenAI() {
+  if (!genAI) {
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) {
+      throw new Error("GEMINI_API_KEY environment variable is required");
+    }
+    genAI = new GoogleGenerativeAI(apiKey);
+  }
+  return genAI;
+}
 
 export interface AnalysisResult {
   aiLikelihood: string;
@@ -10,6 +21,7 @@ export interface AnalysisResult {
 }
 
 export async function analyzeAndHumanize(text: string, intensity: 'standard' | 'aggressive' = 'standard'): Promise<AnalysisResult> {
+  const genAI = getGenAI();
   const prompt = `You are a world-class academic editor and linguistic expert specializing in "Human-Centric" scholarly writing. Your mission is to take a piece of text and rewrite it so it is indistinguishable from high-level human academic writing, specifically targeting the bypass of AI detection algorithms (like ZeroGPT, Originality.ai, etc.).
 
 ### INTENSITY LEVEL: ${intensity.toUpperCase()}
@@ -44,12 +56,11 @@ TEXT TO ANALYZE:
 ${text}`;
 
   try {
-    const response = await ai.models.generateContent({
-      model: "gemini-3.1-pro-preview",
-      contents: prompt,
-    });
-
-    const output = response.text || "";
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    const output = response.text();
+    
     return parseOutput(output);
   } catch (error) {
     console.error("Gemini API Error:", error);
